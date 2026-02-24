@@ -22,6 +22,11 @@ function library.window(title)
     win.Active = true
     win.Draggable = true
     win.Parent = screenGui
+    local winCorner = Instance.new("UICorner", win)
+    winCorner.CornerRadius = UDim.new(0, 6)
+    local winStroke = Instance.new("UIStroke", win)
+    winStroke.Color = Color3.fromRGB(35,35,35)
+    winStroke.Thickness = 1
 
     local titleBar = Instance.new("TextLabel", win)
     titleBar.Size = UDim2.new(1, 0, 0, 30)
@@ -52,11 +57,23 @@ function library.window(title)
     local window = {}
 
     function window:tab(name)
-        local tabFrame = Instance.new("Frame", content)
+        local tabFrame = Instance.new("ScrollingFrame", content)
         tabFrame.Size = UDim2.new(1, 0, 1, 0)
         tabFrame.BackgroundTransparency = 1
+        tabFrame.CanvasSize = UDim2.new(0, 0, 1, 0)
+        tabFrame.ScrollBarThickness = 6
         tabFrame.Visible = false
+        tabFrame.BorderSizePixel = 0
         tabs[name] = tabFrame
+
+        local layout = Instance.new("UIListLayout")
+        layout.Parent = tabFrame
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        layout.Padding = UDim.new(0, 6)
+        layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+        local corner = Instance.new("UICorner", tabFrame)
+        corner.CornerRadius = UDim.new(0, 4)
 
         local btn = Instance.new("TextButton", tabButtons)
         btn.Size = UDim2.new(0, 100, 1, 0)
@@ -66,6 +83,8 @@ function library.window(title)
         btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         btn.TextScaled = true
         btn.LayoutOrder = #tabButtons:GetChildren()
+        local btnCorner = Instance.new("UICorner", btn)
+        btnCorner.CornerRadius = UDim.new(0, 4)
 
         btn.MouseButton1Click:Connect(function()
             for _, f in pairs(tabs) do
@@ -82,26 +101,28 @@ function library.window(title)
         local tabObj = {}
 
         function tabObj:button(label, callback)
-            local b = Instance.new("TextButton", tabFrame)
-            b.Size = UDim2.new(1, -10, 0, 30)
-            b.Position = UDim2.new(0, 5, 0, #tabFrame:GetChildren() * 35)
-            b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            local b = Instance.new("TextButton")
+            b.Size = UDim2.new(1, -20, 0, 30)
+            b.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
             b.TextColor3 = Color3.new(1, 1, 1)
             b.Text = label
             b.Font = Enum.Font.SourceSans
+            b.AutoButtonColor = true
+            b.Parent = tabFrame
+            local c = Instance.new("UICorner", b)
+            c.CornerRadius = UDim.new(0, 4)
             b.MouseButton1Click:Connect(callback or function() end)
             return b
         end
 
         function tabObj:toggle(label, default, callback)
-            local idx = #tabFrame:GetChildren()
-            local frame = Instance.new("Frame", tabFrame)
-            frame.Size = UDim2.new(1, -10, 0, 30)
-            frame.Position = UDim2.new(0, 5, 0, idx * 35)
+            local frame = Instance.new("Frame")
+            frame.Size = UDim2.new(1, -20, 0, 30)
             frame.BackgroundTransparency = 1
+            frame.Parent = tabFrame
 
             local txt = Instance.new("TextLabel", frame)
-            txt.Size = UDim2.new(0.7, 0, 1, 0)
+            txt.Size = UDim2.new(0.6, 0, 1, 0)
             txt.BackgroundTransparency = 1
             txt.TextColor3 = Color3.new(1, 1, 1)
             txt.Text = label
@@ -109,12 +130,14 @@ function library.window(title)
             txt.Font = Enum.Font.SourceSans
 
             local tog = Instance.new("TextButton", frame)
-            tog.Size = UDim2.new(0.3, -5, 1, 0)
-            tog.Position = UDim2.new(0.7, 5, 0, 0)
-            tog.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            tog.Size = UDim2.new(0.3, 0, 1, 0)
+            tog.Position = UDim2.new(0.7, 0, 0, 0)
+            tog.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
             tog.TextColor3 = Color3.new(1, 1, 1)
             tog.Text = default and "ON" or "OFF"
             tog.Font = Enum.Font.SourceSans
+            local c = Instance.new("UICorner", tog)
+            c.CornerRadius = UDim.new(0, 4)
             local state = default
             tog.MouseButton1Click:Connect(function()
                 state = not state
@@ -127,11 +150,10 @@ function library.window(title)
         end
 
         function tabObj:slider(label, min, max, default, callback)
-            local idx = #tabFrame:GetChildren()
-            local frame = Instance.new("Frame", tabFrame)
-            frame.Size = UDim2.new(1, -10, 0, 40)
-            frame.Position = UDim2.new(0, 5, 0, idx * 45)
+            local frame = Instance.new("Frame")
+            frame.Size = UDim2.new(1, -20, 0, 50)
             frame.BackgroundTransparency = 1
+            frame.Parent = tabFrame
 
             local txt = Instance.new("TextLabel", frame)
             txt.Size = UDim2.new(1, 0, 0, 20)
@@ -141,16 +163,19 @@ function library.window(title)
             txt.TextXAlignment = Enum.TextXAlignment.Left
             txt.Font = Enum.Font.SourceSans
 
-            local slider = Instance.new("TextButton", frame)
-            slider.Size = UDim2.new(1, 0, 0, 20)
-            slider.Position = UDim2.new(0, 0, 0, 20)
-            slider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            slider.AutoButtonColor = false
+            local slider = Instance.new("Frame", frame)
+            slider.Size = UDim2.new(1, 0, 0, 10)
+            slider.Position = UDim2.new(0, 0, 0, 30)
+            slider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            local sCorner = Instance.new("UICorner", slider)
+            sCorner.CornerRadius = UDim.new(0, 4)
 
             local fill = Instance.new("Frame", slider)
             local frac = (default - min) / (max - min)
             fill.Size = UDim2.new(frac, 0, 1, 0)
-            fill.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+            fill.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+            local fCorner = Instance.new("UICorner", fill)
+            fCorner.CornerRadius = UDim.new(0, 4)
 
             local dragging = false
             slider.InputBegan:Connect(function(inp)
